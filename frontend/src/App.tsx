@@ -1,24 +1,37 @@
-import React from 'react';
-import { ReactKeycloakProvider } from '@react-keycloak/web';
-import Keycloak, { KeycloakConfig } from 'keycloak-js';
+import React, { useEffect, useState } from 'react';
+import keycloak from './keycloak';
 import ReportPage from './components/ReportPage';
 
-const keycloakConfig: KeycloakConfig = {
-  url: process.env.REACT_APP_KEYCLOAK_URL,
-  realm: process.env.REACT_APP_KEYCLOAK_REALM||"",
-  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID||""
-};
-
-const keycloak = new Keycloak(keycloakConfig);
-
 const App: React.FC = () => {
-  return (
-    <ReactKeycloakProvider authClient={keycloak}>
-      <div className="App">
-        <ReportPage />
-      </div>
-    </ReactKeycloakProvider>
-  );
+    const [authenticated, setAuthenticated] = useState(false);
+    const [initializing, setInitializing] = useState(true);
+
+    useEffect(() => {
+        keycloak
+            .init({
+                onLoad: 'login-required',
+                pkceMethod: 'S256',
+            })
+            .then((auth) => {
+                setAuthenticated(auth);
+            })
+            .catch((error) => {
+                console.error('Keycloak initialization failed', error);
+            })
+            .finally(() => {
+                setInitializing(false);
+            });
+    }, []);
+
+    if (initializing) {
+        return <div>Authenticating...</div>;
+    }
+
+    if (!authenticated) {
+        return <div>Authentication failed</div>;
+    }
+
+    return <ReportPage />;
 };
 
 export default App;
