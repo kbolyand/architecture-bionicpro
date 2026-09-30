@@ -7,7 +7,6 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./postgres-data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
   keycloak:
@@ -48,6 +47,53 @@ services:
     ports: ["8123:8123", "9000:9000"]
     volumes:
       - clickhouse-data:/var/lib/clickhouse
+  airflow:
+    image: apache/airflow:2.10.5-python3.12
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:admin@postgres:5432/db?options=-csearch_path%3Dairflow
+      AIRFLOW__CORE__FERNET_KEY: "change-me-in-production"
+      _PIP_ADDITIONAL_REQUIREMENTS: "psycopg2-binary==2.9.10 clickhouse-connect==0.8.18"
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_DATABASE: db
+      PG_SCHEMA: bionicpro
+      PG_USER: admin
+      PG_PASSWORD: admin
+      CH_HOST: clickhouse
+      CH_PORT: 8123
+      CH_DATABASE: prosthesis
+      CH_USER: click
+      CH_PASSWORD: click
+      TELEMETRY_LOOKBACK_MINUTES: 15
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: >
+      bash -c "
+      airflow db migrate && \
+      airflow users create -e admin@example.com -f Airflow -l Airflow -u admin -p admin -r Admin; 
+      airflow webserver --port 8080 & airflow scheduler
+      "
+  prosthesis-service:
+    build:
+      context: ./prosthesis-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      PG_DB_URL: jdbc:postgresql://postgres:5432/db
+      PG_DB_SCHEMA: bionicpro
+      PG_DB_USERNAME: admin
+      PG_DB_PASSWORD: admin
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/reports-realm/protocol/openid-connect/certs
+      CL_DB_URL: jdbc:clickhouse://clickhouse:8123/prosthesis
+      CL_DB_USERNAME: click
+      CL_DB_PASSWORD: click
 volumes:
   postgres-data:
   clickhouse-data:
+  airflow_data:
