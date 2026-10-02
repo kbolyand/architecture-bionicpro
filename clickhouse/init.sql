@@ -9,16 +9,16 @@ CREATE TABLE IF NOT EXISTS prosthesis.emg_samples
     amplitude Float32,
     frequency Float32,
     sequence_id UInt64
-)
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(event_time)
-ORDER BY (
-    prosthesis_id,
-    sensor_id,
-    channel,
-    event_time,
-    sequence_id
-);
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(event_time)
+    ORDER BY (
+                 prosthesis_id,
+                 sensor_id,
+                 channel,
+                 event_time,
+                 sequence_id
+             );
 
 CREATE TABLE IF NOT EXISTS prosthesis.prostheses_dim
 (
@@ -30,9 +30,9 @@ CREATE TABLE IF NOT EXISTS prosthesis.prostheses_dim
     installed_at Date,
     status String,
     updated_at DateTime64(3, 'UTC')
-)
-ENGINE = ReplacingMergeTree(updated_at)
-ORDER BY prosthesis_id;
+    )
+    ENGINE = ReplacingMergeTree(updated_at)
+    ORDER BY prosthesis_id;
 
 CREATE TABLE IF NOT EXISTS prosthesis.telemetry_client_daily
 (
@@ -54,12 +54,12 @@ CREATE TABLE IF NOT EXISTS prosthesis.telemetry_client_daily
 
     first_event_time DateTime64(3, 'UTC'),
     last_event_time DateTime64(3, 'UTC')
-)
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(report_date)
-ORDER BY (
-    user_id,
-    report_date,
-    prosthesis_id,
-    channel
-);
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(report_date)
+    ORDER BY (
+                 user_id,
+                 report_date,
+                 prosthesis_id,
+                 channel
+             );

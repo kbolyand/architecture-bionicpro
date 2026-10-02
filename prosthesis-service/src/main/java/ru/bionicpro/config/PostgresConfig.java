@@ -36,6 +36,7 @@ public class PostgresConfig {
                 .dataSource(dataSource)
                 .schemas("bionicpro")
                 .locations("classpath:db/migration/postgres")
+                .baselineOnMigrate(true)
                 .load();
         flyway.migrate();
         return flyway;

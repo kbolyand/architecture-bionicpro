@@ -35,6 +35,7 @@ public class ClickHouseConfig {
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/migration/clickhouse")
+                .baselineOnMigrate(true)
                 .load();
         flyway.migrate();
         return flyway;
