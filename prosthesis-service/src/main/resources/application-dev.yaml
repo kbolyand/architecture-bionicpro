@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/db
+    schema: bionicpro
+    username: admin
+    password: admin
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/realms/reports-realm/protocol/openid-connect/certs
+
+clickhouse:
+  datasource:
+    url: jdbc:clickhouse://localhost:8123/prosthesis
+    username: click
+    password: click

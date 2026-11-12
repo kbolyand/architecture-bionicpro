@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: prosthesis-service
+  datasource:
+    url: ${PG_DB_URL}
+    schema: ${PG_DB_SCHEMA}
+    username: ${PG_DB_USERNAME}
+    password: ${PG_DB_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+server:
+  port: 8000
+
+clickhouse:
+  datasource:
+    url: ${CL_DB_URL}
+    username: ${CL_DB_USERNAME}
+    password: ${CL_DB_PASSWORD}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
